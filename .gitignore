@@ -1,0 +1,19 @@
+
+/**/target/
+.m2/
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Local environment files
+.env
+.env.*
+!deploy/.env.prod.example
+deploy/.env.prod

@@ -1,0 +1,58 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: stufamily-backend
+  datasource:
+    url: jdbc:postgresql://localhost:5000/stufamily?currentSchema=stufamily&stringtype=unspecified
+    username: postgres
+    password: 123456
+    driver-class-name: org.postgresql.Driver
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  global-config:
+    db-config:
+      id-type: auto
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+logging:
+  level:
+    root: INFO
+    com.stufamily.backend: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId}] %-5level %logger{36} - %msg%n"
+
+app:
+  security:
+    jwt:
+      issuer: stuFamily
+      secret: "ChangeThisJwtSecretForProductionAndKeepAtLeast32Chars!!"
+      access-expire-seconds: 7200
+      refresh-expire-seconds: 604800
+  wechat:
+    miniapp:
+      app-id: "your-app-id"
+      secret: "your-secret"
+      msg-data-format: JSON
+    pay:
+      app-id: "your-miniapp-appid"
+      mch-id: "your-mchid"
+      mch-key: "your-mch-key"
+      notify-url: "https://your-domain.com/api/weixin/pay/notify"
+      mock-create-order-enabled: true
+      mock-notify-enabled: true

@@ -1,0 +1,1330 @@
+﻿{
+    "info":  {
+                 "_postman_id":  "0ec2ed2e-6304-4a65-9de6-667638d6750f",
+                 "name":  "stuFamily-backend API",
+                 "schema":  "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+             },
+    "event":  [
+                  {
+                      "listen":  "prerequest",
+                      "script":  {
+                                     "type":  "text/javascript",
+                                     "exec":  [
+                                                  "if (!pm.environment.get(\"weixin_token\") \u0026\u0026 pm.environment.get(\"admin_token\")) {",
+                                                  "  pm.environment.set(\"weixin_token\", pm.environment.get(\"admin_token\"));",
+                                                  "}",
+                                                  "if (!pm.environment.get(\"member_card_received_date\")) {",
+                                                  "  pm.environment.set(\"member_card_received_date\", new Date().toISOString().slice(0, 10));",
+                                                  "}"
+                                              ]
+                                 }
+                  }
+              ],
+    "item":  [
+                 {
+                     "name":  "Admin API",
+                     "item":  [
+                                  {
+                                      "name":  "Admin Login",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"status is 200\", function () {",
+                                                                                    "  pm.expect(pm.response.code).to.eql(200);",
+                                                                                    "});",
+                                                                                    "let json = {};",
+                                                                                    "try { json = pm.response.json(); } catch (e) {}",
+                                                                                    "pm.test(\"response success\", function () {",
+                                                                                    "  pm.expect(json.success).to.eql(true);",
+                                                                                    "  pm.expect(json.data).to.have.property(\"accessToken\");",
+                                                                                    "});",
+                                                                                    "if (json.data \u0026\u0026 json.data.accessToken) {",
+                                                                                    "  pm.environment.set(\"admin_token\", json.data.accessToken);",
+                                                                                    "}"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"username\": \"{{admin_username}}\",\n  \"password\": \"{{admin_password}}\"\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/admin/auth/login",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "auth",
+                                                                               "login"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Admin Logout",
+                                      "request":  {
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "method":  "POST",
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/admin/auth/logout",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "auth",
+                                                                               "logout"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "List Admin Accounts",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "let json = {};",
+                                                                                    "try { json = pm.response.json(); } catch (e) {}",
+                                                                                    "if (json.success === true \u0026\u0026 Array.isArray(json.data) \u0026\u0026 json.data.length \u003e 0) {",
+                                                                                    "  pm.environment.set(\"target_admin_user_id\", String(json.data[0].id));",
+                                                                                    "}"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/admin/accounts?keyword={{admin_account_keyword}}\u0026status={{admin_account_status}}\u0026page_no={{page_no}}\u0026page_size={{page_size}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "accounts"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "keyword",
+                                                                                    "value":  "{{admin_account_keyword}}"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "status",
+                                                                                    "value":  "{{admin_account_status}}"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "page_no",
+                                                                                    "value":  "{{page_no}}"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "page_size",
+                                                                                    "value":  "{{page_size}}"
+                                                                                }
+                                                                            ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Create Admin Account",
+                                      "request":  {
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"username\": \"{{new_admin_username}}\",\n  \"password\": \"{{new_admin_password}}\",\n  \"nickname\": \"{{new_admin_nickname}}\",\n  \"phone\": \"{{new_admin_phone}}\",\n  \"email\": \"{{new_admin_email}}\"\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/admin/accounts",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "accounts"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Validate Admin Password Strength",
+                                      "request":  {
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"password\": \"{{new_admin_password}}\",\n  \"username\": \"{{new_admin_username}}\"\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/admin/accounts/password/validate",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "accounts",
+                                                                               "password",
+                                                                               "validate"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Change Admin Password",
+                                      "request":  {
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"newPassword\": \"{{reset_admin_password}}\"\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/admin/accounts/{{target_admin_user_id}}/password",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "accounts",
+                                                                               "{{target_admin_user_id}}",
+                                                                               "password"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Disable Admin Account",
+                                      "request":  {
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "method":  "POST",
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/admin/accounts/{{target_admin_user_id}}/disable",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "accounts",
+                                                                               "{{target_admin_user_id}}",
+                                                                               "disable"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "List Admin Products",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "let json = {};",
+                                                                                    "try { json = pm.response.json(); } catch (e) {}",
+                                                                                    "if (json.success === true \u0026\u0026 Array.isArray(json.data)) {",
+                                                                                    "  const family = json.data.find(x =\u003e x.type === \"FAMILY_CARD\");",
+                                                                                    "  const vas = json.data.find(x =\u003e x.type === \"VALUE_ADDED_SERVICE\");",
+                                                                                    "  if (family \u0026\u0026 family.id) pm.environment.set(\"family_card_product_id\", String(family.id));",
+                                                                                    "  if (vas \u0026\u0026 vas.id) pm.environment.set(\"value_added_product_id\", String(vas.id));",
+                                                                                    "}"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/admin/products?sale_start_at={{sale_start_at}}\u0026sale_end_at={{sale_end_at}}\u0026publish_status={{product_publish_status}}\u0026page_no={{page_no}}\u0026page_size={{page_size}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "products"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "sale_start_at",
+                                                                                    "value":  "{{sale_start_at}}"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "sale_end_at",
+                                                                                    "value":  "{{sale_end_at}}"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "publish_status",
+                                                                                    "value":  "{{product_publish_status}}"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "page_no",
+                                                                                    "value":  "{{page_no}}"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "page_size",
+                                                                                    "value":  "{{page_size}}"
+                                                                                }
+                                                                            ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Get Admin Product Detail",
+                                      "request":  {
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/admin/products/{{family_card_product_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "products",
+                                                                               "{{family_card_product_id}}"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Create Admin Product",
+                                      "request":  {
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"productType\": \"VALUE_ADDED_SERVICE\",\n  \"title\": \"New VAS Product\",\n  \"subtitle\": \"Test subtitle\",\n  \"detailContent\": \"Test detail\",\n  \"imageUrls\": [\"https://example.com/img/test.png\"],\n  \"contactName\": \"Service Desk\",\n  \"contactPhone\": \"021-12345678\",\n  \"serviceStartAt\": null,\n  \"serviceEndAt\": null,\n  \"saleStartAt\": null,\n  \"saleEndAt\": null,\n  \"publishStatus\": \"DRAFT\",\n  \"top\": false,\n  \"displayPriority\": 0,\n  \"familyCardPlans\": null,\n  \"valueAddedSkus\": [\n    {\n      \"title\": \"Single Service\",\n      \"priceCents\": 12900,\n      \"enabled\": true\n    }\n  ]\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/admin/products",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "products"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Update Admin Product",
+                                      "request":  {
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"productType\": \"FAMILY_CARD\",\n  \"title\": \"Family Card Monthly\",\n  \"subtitle\": \"Updated subtitle\",\n  \"detailContent\": \"Updated detail\",\n  \"imageUrls\": [\"https://example.com/img/family-card.png\"],\n  \"contactName\": \"Service Desk\",\n  \"contactPhone\": \"021-12345678\",\n  \"serviceStartAt\": null,\n  \"serviceEndAt\": null,\n  \"saleStartAt\": null,\n  \"saleEndAt\": null,\n  \"publishStatus\": \"DRAFT\",\n  \"top\": true,\n  \"displayPriority\": 100,\n  \"familyCardPlans\": [\n    {\n      \"durationType\": \"MONTH\",\n      \"durationMonths\": 1,\n      \"priceCents\": 19900,\n      \"maxFamilyMembers\": 3,\n      \"enabled\": true\n    }\n  ],\n  \"valueAddedSkus\": null\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/admin/products/{{family_card_product_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "products",
+                                                                               "{{family_card_product_id}}"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "On Shelf Product",
+                                      "request":  {
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "method":  "POST",
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/admin/products/{{family_card_product_id}}/on-shelf",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "products",
+                                                                               "{{family_card_product_id}}",
+                                                                               "on-shelf"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Off Shelf Product",
+                                      "request":  {
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "method":  "POST",
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/admin/products/{{family_card_product_id}}/off-shelf",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "products",
+                                                                               "{{family_card_product_id}}",
+                                                                               "off-shelf"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "List Admin Filter Options",
+                                      "request":  {
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/admin/filter-options",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "filter-options"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "List Weixin Users",
+                                      "request":  {
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/admin/weixin-users?keyword={{query_keyword}}\u0026status={{weixin_user_status}}\u0026page_no={{page_no}}\u0026page_size={{page_size}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "weixin-users"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "keyword",
+                                                                                    "value":  "{{query_keyword}}"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "status",
+                                                                                    "value":  "{{weixin_user_status}}"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "page_no",
+                                                                                    "value":  "{{page_no}}"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "page_size",
+                                                                                    "value":  "{{page_size}}"
+                                                                                }
+                                                                            ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "List Orders With Weixin User",
+                                      "request":  {
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/admin/orders?order_status={{order_status}}\u0026order_type={{order_type}}\u0026keyword={{query_keyword}}\u0026page_no={{page_no}}\u0026page_size={{page_size}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "orders"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "order_status",
+                                                                                    "value":  "{{order_status}}"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "order_type",
+                                                                                    "value":  "{{order_type}}"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "keyword",
+                                                                                    "value":  "{{query_keyword}}"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "page_no",
+                                                                                    "value":  "{{page_no}}"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "page_size",
+                                                                                    "value":  "{{page_size}}"
+                                                                                }
+                                                                            ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "List Family Cards With Weixin User",
+                                      "request":  {
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/admin/family-cards?status={{family_status}}\u0026keyword={{query_keyword}}\u0026page_no={{page_no}}\u0026page_size={{page_size}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "family-cards"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "status",
+                                                                                    "value":  "{{family_status}}"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "keyword",
+                                                                                    "value":  "{{query_keyword}}"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "page_no",
+                                                                                    "value":  "{{page_no}}"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "page_size",
+                                                                                    "value":  "{{page_size}}"
+                                                                                }
+                                                                            ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Refund Order",
+                                      "request":  {
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"refundAmountCents\": {{refund_amount_cents}},\n  \"reason\": \"{{refund_reason}}\"\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/admin/orders/{{order_no}}/refund",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "orders",
+                                                                               "{{order_no}}",
+                                                                               "refund"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "List Order Refunds",
+                                      "request":  {
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/admin/orders/{{order_no}}/refunds?page_no={{page_no}}\u0026page_size={{page_size}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "orders",
+                                                                               "{{order_no}}",
+                                                                               "refunds"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "page_no",
+                                                                                    "value":  "{{page_no}}"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "page_size",
+                                                                                    "value":  "{{page_size}}"
+                                                                                }
+                                                                            ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Disable Family Group By Order",
+                                      "request":  {
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "method":  "POST",
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/admin/orders/{{order_no}}/disable-family-group",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "orders",
+                                                                               "{{order_no}}",
+                                                                               "disable-family-group"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Weixin API",
+                     "item":  [
+                                  {
+                                      "name":  "Home Index",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/weixin/home/index",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "weixin",
+                                                                               "home",
+                                                                               "index"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "List Home Products",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "let json = {};",
+                                                                                    "try { json = pm.response.json(); } catch (e) {}",
+                                                                                    "if (json.success === true \u0026\u0026 Array.isArray(json.data)) {",
+                                                                                    "  const family = json.data.find(x =\u003e x.type === \"FAMILY_CARD\");",
+                                                                                    "  const vas = json.data.find(x =\u003e x.type === \"VALUE_ADDED_SERVICE\");",
+                                                                                    "  if (family \u0026\u0026 family.id) pm.environment.set(\"family_card_product_id\", String(family.id));",
+                                                                                    "  if (vas \u0026\u0026 vas.id) pm.environment.set(\"value_added_product_id\", String(vas.id));",
+                                                                                    "}"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/weixin/home/products?sale_start_at={{sale_start_at}}\u0026sale_end_at={{sale_end_at}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "weixin",
+                                                                               "home",
+                                                                               "products"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "sale_start_at",
+                                                                                    "value":  "{{sale_start_at}}"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "sale_end_at",
+                                                                                    "value":  "{{sale_end_at}}"
+                                                                                }
+                                                                            ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Get Product Detail",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/weixin/home/products/{{family_card_product_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "weixin",
+                                                                               "home",
+                                                                               "products",
+                                                                               "{{family_card_product_id}}"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Weixin Login",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\"status is 200\", function () {",
+                                                                                    "  pm.expect(pm.response.code).to.eql(200);",
+                                                                                    "});",
+                                                                                    "let json = {};",
+                                                                                    "try { json = pm.response.json(); } catch (e) {}",
+                                                                                    "if (json.success === true \u0026\u0026 json.data \u0026\u0026 json.data.accessToken) {",
+                                                                                    "  pm.environment.set(\"weixin_token\", json.data.accessToken);",
+                                                                                    "}"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"code\": \"{{weixin_code}}\",\n  \"nickname\": \"{{weixin_nickname}}\",\n  \"avatarUrl\": \"{{weixin_avatar_url}}\"\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/weixin/auth/login",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "weixin",
+                                                                               "auth",
+                                                                               "login"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Create Family Card Order",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "let json = {};",
+                                                                                    "try { json = pm.response.json(); } catch (e) {}",
+                                                                                    "if (json.success === true \u0026\u0026 json.data \u0026\u0026 json.data.orderNo) {",
+                                                                                    "  pm.environment.set(\"order_no\", json.data.orderNo);",
+                                                                                    "}"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{weixin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"productType\": \"FAMILY_CARD\",\n  \"productId\": {{family_card_product_id}},\n  \"durationType\": \"{{family_duration_type}}\",\n  \"amountCents\": {{family_order_amount_cents}}\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/weixin/orders/create",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "weixin",
+                                                                               "orders",
+                                                                               "create"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Create Value Added Order",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "let json = {};",
+                                                                                    "try { json = pm.response.json(); } catch (e) {}",
+                                                                                    "if (json.success === true \u0026\u0026 json.data \u0026\u0026 json.data.orderNo) {",
+                                                                                    "  pm.environment.set(\"order_no\", json.data.orderNo);",
+                                                                                    "}"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{weixin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"productType\": \"VALUE_ADDED_SERVICE\",\n  \"productId\": {{value_added_product_id}},\n  \"durationType\": null,\n  \"amountCents\": {{value_added_order_amount_cents}}\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/weixin/orders/create",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "weixin",
+                                                                               "orders",
+                                                                               "create"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Get Order Status",
+                                      "request":  {
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{weixin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/weixin/orders/{{order_no}}/status",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "weixin",
+                                                                               "orders",
+                                                                               "{{order_no}}",
+                                                                               "status"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Pay Notify",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "prerequest",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.environment.set(\"txn_id\", \"TXN\" + Date.now());"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"outTradeNo\": \"{{order_no}}\",\n  \"transactionId\": \"{{txn_id}}\",\n  \"totalAmountCents\": {{family_order_amount_cents}}\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/weixin/pay/notify",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "weixin",
+                                                                               "pay",
+                                                                               "notify"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Add Family Member",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "let json = {};",
+                                                                                    "try { json = pm.response.json(); } catch (e) {}",
+                                                                                    "if (json.success === true \u0026\u0026 json.data \u0026\u0026 json.data.memberNo) {",
+                                                                                    "  pm.environment.set(\"member_no\", json.data.memberNo);",
+                                                                                    "}"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{weixin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"memberName\": \"{{member_name}}\",\n  \"studentOrCardNo\": \"{{member_student_no}}\",\n  \"cardReceivedDate\": \"{{member_card_received_date}}\"\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/weixin/family/members",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "weixin",
+                                                                               "family",
+                                                                               "members"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Search Family Members",
+                                      "request":  {
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{weixin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/weixin/family/members?keyword={{member_search_keyword}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "weixin",
+                                                                               "family",
+                                                                               "members"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "keyword",
+                                                                                    "value":  "{{member_search_keyword}}"
+                                                                                }
+                                                                            ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Cancel Family Member Card",
+                                      "request":  {
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{weixin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "method":  "DELETE",
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/weixin/family/members/{{member_no}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "weixin",
+                                                                               "family",
+                                                                               "members",
+                                                                               "{{member_no}}"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  }
+                              ]
+                 }
+             ]
+}

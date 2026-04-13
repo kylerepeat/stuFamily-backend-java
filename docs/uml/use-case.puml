@@ -1,0 +1,55 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Mini Program User" as MiniUser
+actor "Admin Operator" as Admin
+actor "WeChat OAuth" as WxAuth
+actor "WeChat Pay" as WxPay
+
+rectangle "stuFamily-backend" {
+  usecase "WeChat Login\n(get openId/nickname/avatar)" as UC_Login
+  usecase "Browse Home\n(banners/site info/product list)" as UC_BrowseHome
+  usecase "View Product Detail\n(with visibility rules)" as UC_ViewDetail
+  usecase "Create Pending Order" as UC_CreateOrder
+  usecase "Initiate WeChat Pay" as UC_StartPay
+  usecase "Receive Payment Callback" as UC_Notify
+  usecase "Register Family Members" as UC_RegisterMember
+  usecase "View Family Cards\n(slidable group members)" as UC_ViewCards
+  usecase "Search Family Members" as UC_SearchMember
+  usecase "Cancel Expired Member Card" as UC_CancelCard
+
+  usecase "Manage Products\n(Family Card / Value-added Service)" as UC_ManageProducts
+  usecase "Manage Visibility Rules" as UC_ManageRules
+  usecase "Manage Banners & Site Info" as UC_ManageContent
+  usecase "Manage Service Categories" as UC_ManageCategory
+  usecase "Query Orders & Payment Ledger" as UC_QueryLedger
+}
+
+MiniUser --> UC_Login
+MiniUser --> UC_BrowseHome
+MiniUser --> UC_ViewDetail
+MiniUser --> UC_CreateOrder
+MiniUser --> UC_StartPay
+MiniUser --> UC_RegisterMember
+MiniUser --> UC_ViewCards
+MiniUser --> UC_SearchMember
+MiniUser --> UC_CancelCard
+
+Admin --> UC_ManageProducts
+Admin --> UC_ManageRules
+Admin --> UC_ManageContent
+Admin --> UC_ManageCategory
+Admin --> UC_QueryLedger
+
+UC_Login --> WxAuth
+UC_StartPay --> WxPay
+UC_Notify --> WxPay
+
+UC_CreateOrder .> UC_ViewDetail : <<include>>
+UC_StartPay .> UC_CreateOrder : <<include>>
+UC_RegisterMember .> UC_Notify : <<include>>
+UC_ManageProducts .> UC_ManageRules : <<include>>
+
+@enduml
+
