@@ -70,6 +70,10 @@ class HomeApplicationServiceTest {
 
     @Test
     void shouldReturnHomepageDataFromDatabase() {
+        OffsetDateTime now = OffsetDateTime.now();
+        LocalDate saleStartDate = now.toLocalDate().minusDays(1);
+        LocalDate saleEndDate = now.toLocalDate().plusDays(1);
+
         HomepageBannerDO banner = new HomepageBannerDO();
         banner.setId(1L);
         banner.setTitle("banner");
@@ -97,8 +101,8 @@ class HomeApplicationServiceTest {
         familyProduct.setTop(true);
         familyProduct.setPublishStatus("ON_SHELF");
         familyProduct.setDeleted(false);
-        familyProduct.setSaleStartAt(OffsetDateTime.parse("2026-03-01T00:00:00+08:00"));
-        familyProduct.setSaleEndAt(OffsetDateTime.parse("2026-03-31T23:59:59+08:00"));
+        familyProduct.setSaleStartAt(now.minusDays(1));
+        familyProduct.setSaleEndAt(now.plusDays(1));
         ProductDO valueAddedProduct = new ProductDO();
         valueAddedProduct.setId(101L);
         valueAddedProduct.setProductType("VALUE_ADDED_SERVICE");
@@ -106,8 +110,8 @@ class HomeApplicationServiceTest {
         valueAddedProduct.setTop(false);
         valueAddedProduct.setPublishStatus("ON_SHELF");
         valueAddedProduct.setDeleted(false);
-        valueAddedProduct.setSaleStartAt(OffsetDateTime.parse("2026-03-05T00:00:00+08:00"));
-        valueAddedProduct.setSaleEndAt(OffsetDateTime.parse("2026-03-20T23:59:59+08:00"));
+        valueAddedProduct.setSaleStartAt(now.minusDays(1));
+        valueAddedProduct.setSaleEndAt(now.plusDays(1));
         when(productMapper.selectList(any())).thenReturn(List.of(familyProduct, valueAddedProduct));
 
         ProductFamilyCardPlanDO plan = new ProductFamilyCardPlanDO();
@@ -125,7 +129,7 @@ class HomeApplicationServiceTest {
         assertEquals("通知标题", home.notices().get(0).title());
         assertEquals("通知内容", home.notices().get(0).content());
         assertFalse(home.banners().isEmpty());
-        var products = service.loadProducts(LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 31));
+        var products = service.loadProducts(saleStartDate, saleEndDate);
         assertEquals(2, products.size());
         assertEquals(199900L, products.get(0).priceCents());
         assertEquals(12900L, products.get(1).priceCents());
@@ -138,12 +142,13 @@ class HomeApplicationServiceTest {
 
     @Test
     void shouldRejectDetailWhenOutOfSaleWindow() {
+        OffsetDateTime futureStartAt = OffsetDateTime.now().plusYears(1);
         ProductDO product = new ProductDO();
         product.setId(200L);
         product.setPublishStatus("ON_SHELF");
         product.setDeleted(false);
-        product.setSaleStartAt(OffsetDateTime.parse("2099-01-01T00:00:00+08:00"));
-        product.setSaleEndAt(OffsetDateTime.parse("2099-12-31T23:59:59+08:00"));
+        product.setSaleStartAt(futureStartAt);
+        product.setSaleEndAt(futureStartAt.plusYears(1));
         when(productMapper.selectById(200L)).thenReturn(product);
 
         assertThrows(BusinessException.class, () -> service.loadProductDetail(200L));
