@@ -1,0 +1,63 @@
+version: "2.4"
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: stufamily-postgres-test
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Shanghai
+      POSTGRES_DB: stufamily
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+    ports:
+      - "15432:5432"
+    volumes:
+      - stufamily-postgres-data:/var/lib/postgresql/data
+      - ../sql/01_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ../sql/02_postman_seed.sql:/docker-entrypoint-initdb.d/02_postman_seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d stufamily"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - stufamily-test-net
+
+  backend:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: stufamily-backend:test
+    container_name: stufamily-backend-test
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      TZ: Asia/Shanghai
+      JAVA_OPTS: "-Xms256m -Xmx512m"
+      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/stufamily?currentSchema=stufamily&stringtype=unspecified
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 123456
+      APP_SECURITY_JWT_SECRET: ChangeThisJwtSecretForTestAndKeepAtLeast32Chars!!
+      APP_WECHAT_MINIAPP_APP_ID: test-miniapp-appid
+      APP_WECHAT_MINIAPP_SECRET: test-miniapp-secret
+      APP_WECHAT_PAY_APP_ID: test-miniapp-appid
+      APP_WECHAT_PAY_MCH_ID: test-mchid
+      APP_WECHAT_PAY_MCH_KEY: test-mch-key
+      APP_WECHAT_PAY_NOTIFY_URL: http://localhost:18080/api/weixin/pay/notify
+      APP_WECHAT_PAY_MOCK_CREATE_ORDER_ENABLED: "true"
+      APP_WECHAT_PAY_MOCK_NOTIFY_ENABLED: "true"
+    ports:
+      - "18080:8080"
+    networks:
+      - stufamily-test-net
+
+networks:
+  stufamily-test-net:
+    driver: bridge
+
+volumes:
+  stufamily-postgres-data:
